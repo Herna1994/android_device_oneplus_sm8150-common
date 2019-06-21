@@ -76,6 +76,10 @@ PRODUCT_PACKAGES += \
     libdisplayconfig \
     libqdMetaData.system
 
+# Fingerprint
+PRODUCT_PACKAGES += \
+    pa.biometrics.fingerprint.inscreen@1.0-service.oneplus_msmnile
+
 # HIDL
 PRODUCT_PACKAGES += \
     android.hidl.base@1.0 \
