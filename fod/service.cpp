@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "pa.biometrics.fingerprint.inscreen@1.0-service.oneplus_fajita"
+#define LOG_TAG "pa.biometrics.fingerprint.inscreen@1.0-service.oneplus_msmnile"
 
 #include <android-base/logging.h>
 #include <hidl/HidlTransportSupport.h>

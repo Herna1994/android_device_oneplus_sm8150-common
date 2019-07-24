@@ -23,7 +23,7 @@ TARGET_SPECIFIC_HEADER_PATH := $(COMMON_PATH)/include
 
 # Architecture
 TARGET_ARCH := arm64
-TARGET_ARCH_VARIANT := armv8-a
+TARGET_ARCH_VARIANT := armv8-2a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
 TARGET_CPU_VARIANT := kryo300
@@ -37,12 +37,13 @@ TARGET_2ND_CPU_VARIANT := cortex-a75
 TARGET_USES_64_BIT_BINDER := true
 
 # Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := msmnile
+TARGET_BOOTLOADER_BOARD_NAME := sm8150
 TARGET_NO_BOOTLOADER := true
+TARGET_USES_UEFI := true
 
 # Kernel
 BOARD_KERNEL_BASE := 0x00000000
-BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.console=ttyMSM0 video=vfb:640x400,bpp=32,memsize=3072000 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 service_locator.enable=1 swiotlb=2048 androidboot.configfs=true androidboot.usbcontroller=a600000.dwc3 firmware_class.path=/vendor/firmware_mnt/image loop.max_part=7
+BOARD_KERNEL_CMDLINE := androidboot.hardware=qcom androidboot.console=ttyMSM0 androidboot.memcg=1 lpm_levels.sleep_disabled=1 video=vfb:640x400,bpp=32,memsize=3072000 msm_rtb.filter=0x237 service_locator.enable=1 swiotlb=2048 firmware_class.path=/vendor/firmware_mnt/image loop.max_part=7 androidboot.usbcontroller=a600000.dwc3
 BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
 BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
 BOARD_KERNEL_PAGESIZE := 4096
@@ -104,6 +105,10 @@ TARGET_ENABLE_MEDIADRM_64 := true
 # Filesystem
 TARGET_FS_CONFIG_GEN := $(COMMON_PATH)/config.fs
 
+# Fingerprint
+SOONG_CONFIG_NAMESPACES += oneplusMsmnileFodPlugin
+SOONG_CONFIG_oneplusMsmnileFodPlugin := posX posY size
+
 # Gestures
 TARGET_GESTURES_NODE := "/proc/touchpanel/gesture_enable"
 
@@ -113,6 +118,9 @@ DEVICE_FRAMEWORK_MANIFEST_FILE := $(COMMON_PATH)/framework_manifest.xml
 
 # Lights
 TARGET_PROVIDES_LIBLIGHT := true
+
+# Metadata
+BOARD_USES_METADATA_PARTITION := true
 
 # Partitions
 BOARD_BOOTIMAGE_PARTITION_SIZE := 100663296

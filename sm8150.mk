@@ -47,6 +47,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     fs_config_files
 
+PRODUCT_COPY_FILES += \
+	$(LOCAL_PATH)/rootdir/etc/fstab.qcom:system/etc/fstab.qcom
+
 # Audio
 PRODUCT_PACKAGES += \
     android.hardware.audio@4.0 \
@@ -110,6 +113,10 @@ PRODUCT_PACKAGES += \
 
 # Perf
 -include vendor/qcom/common/qti-vendor.mk
+
+# Permissions
+PRODUCT_COPY_FILES += \
+    vendor/pa/config/permissions/vendor.pa.biometrics.fingerprint.inscreen.xml:system/etc/permissions/vendor.pa.biometrics.fingerprint.inscreen.xml
 
 # Power
 PRODUCT_PACKAGES += \

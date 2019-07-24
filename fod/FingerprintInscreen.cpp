@@ -20,9 +20,8 @@
 #include <android-base/logging.h>
 #include <hidl/HidlTransportSupport.h>
 #include <fstream>
-#include <poll.h>
-#include <thread>
-#include <unistd.h>
+
+#define FINGERPRINT_ACQUIRED_VENDOR 6
 
 #define OP_ENABLE_FP_LONGPRESS 3
 #define OP_DISABLE_FP_LONGPRESS 4
@@ -36,9 +35,6 @@
 // This is not a typo by me. It's by OnePlus.
 #define HBM_ENABLE_PATH "/sys/class/drm/card0-DSI-1/op_friginer_print_hbm"
 #define DIM_AMOUNT_PATH "/sys/class/drm/card0-DSI-1/dim_alpha"
-
-#define FP_IRQ_PATH_SILEAD "/sys/devices/platform/soc/soc:silead_fp/of_node/fp-gpio-irq"
-#define FP_IRQ_PATH_GOODIX "/sys/devices/platform/soc/soc:goodix_fp/of_node/fp-gpio-irq"
 
 namespace vendor {
 namespace pa {
@@ -69,62 +65,9 @@ static T get(const std::string& path, const T& def) {
 FingerprintInscreen::FingerprintInscreen() {
     this->mVendorFpService = IVendorFingerprintExtensions::getService();
     this->mVendorDisplayService = IOneplusDisplay::getService();
-
-    std::thread([this] {
-        while (true) {
-            auto fd = open(FP_IRQ_PATH_SILEAD, O_RDONLY);
-
-            if (fd < 0) {
-                LOG(ERROR) << "Can't open " << FP_IRQ_PATH_SILEAD << "!";
-
-                fd = open(FP_IRQ_PATH_GOODIX, O_RDONLY);
-
-                if (fd < 0) {
-                    LOG(ERROR) << "Can't open " << FP_IRQ_PATH_GOODIX << "!";
-                    return;
-                }
-            }
-
-            char value;
-            read(fd, &value, 1);
-
-            {
-                std::lock_guard<std::mutex> _lock(mCallbackLock);
-                if (mCallback != nullptr) {
-                    switch (value) {
-                        case '0': {
-                            Return<void> ret = mCallback->onFingerUp();
-                            if (!ret.isOk()) {
-                                LOG(ERROR) << "FingerUp() error: " << ret.description();
-                            }
-                            break;
-                        }
-                        case '1': {
-                            Return<void> ret = mCallback->onFingerDown();
-                            if (!ret.isOk()) {
-                                LOG(ERROR) << "FingerDown() error: " << ret.description();
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            pollfd ufd{fd, POLLPRI | POLLERR, 0};
-
-            if (poll(&ufd, 1, -1) < 0) {
-                LOG(ERROR) << "Oops, poll() failed";
-                return;
-            }
-
-            close(fd);
-        }
-    }).detach();
 }
 
 Return<void> FingerprintInscreen::onStartEnroll() {
-    LOG(INFO) << __func__;
-
     this->mVendorFpService->updateStatus(OP_DISABLE_FP_LONGPRESS);
     this->mVendorFpService->updateStatus(OP_RESUME_FP_ENROLL);
 
@@ -132,16 +75,12 @@ Return<void> FingerprintInscreen::onStartEnroll() {
 }
 
 Return<void> FingerprintInscreen::onFinishEnroll() {
-    LOG(INFO) << __func__;
-
     this->mVendorFpService->updateStatus(OP_FINISH_FP_ENROLL);
 
     return Void();
 }
 
 Return<void> FingerprintInscreen::onPress() {
-    LOG(INFO) << __func__;
-
     this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 2);
     this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 1);
     set(HBM_ENABLE_PATH, 1);
@@ -151,8 +90,6 @@ Return<void> FingerprintInscreen::onPress() {
 }
 
 Return<void> FingerprintInscreen::onRelease() {
-    LOG(INFO) << __func__;
-
     this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 0);
     this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 0);
     set(HBM_ENABLE_PATH, 0);
@@ -162,14 +99,10 @@ Return<void> FingerprintInscreen::onRelease() {
 }
 
 Return<void> FingerprintInscreen::onShowFODView() {
-    LOG(INFO) << __func__;
-
     return Void();
 }
 
 Return<void> FingerprintInscreen::onHideFODView() {
-    LOG(INFO) << __func__;
-
     this->mVendorDisplayService->setMode(OP_DISPLAY_AOD_MODE, 0);
     this->mVendorDisplayService->setMode(OP_DISPLAY_SET_DIM, 0);
     set(HBM_ENABLE_PATH, 0);
@@ -178,8 +111,35 @@ Return<void> FingerprintInscreen::onHideFODView() {
     return Void();
 }
 
-Return<bool> FingerprintInscreen::shouldHandleError(int32_t error) {
-    return error != 8;
+Return<bool> FingerprintInscreen::handleAcquired(int32_t acquiredInfo, int32_t vendorCode) {
+    std::lock_guard<std::mutex> _lock(mCallbackLock);
+    if (mCallback == nullptr) {
+        return false;
+    }
+
+    if (acquiredInfo == FINGERPRINT_ACQUIRED_VENDOR) {
+        if (vendorCode == 0) {
+            Return<void> ret = mCallback->onFingerDown();
+            if (!ret.isOk()) {
+                LOG(ERROR) << "FingerDown() error: " << ret.description();
+            }
+            return true;
+        }
+
+        if (vendorCode == 1) {
+            Return<void> ret = mCallback->onFingerUp();
+            if (!ret.isOk()) {
+                LOG(ERROR) << "FingerUp() error: " << ret.description();
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Return<bool> FingerprintInscreen::handleError(int32_t, int32_t) {
+    return false;
 }
 
 Return<void> FingerprintInscreen::setLongPressEnabled(bool enabled) {
@@ -190,8 +150,6 @@ Return<void> FingerprintInscreen::setLongPressEnabled(bool enabled) {
 }
 
 Return<int32_t> FingerprintInscreen::getDimAmount(int32_t) {
-    LOG(INFO) << __func__;
-
     int dimAmount = get(DIM_AMOUNT_PATH, 0);
     LOG(INFO) << "dimAmount = " << dimAmount;
 
@@ -203,14 +161,24 @@ Return<bool> FingerprintInscreen::shouldBoostBrightness() {
 }
 
 Return<void> FingerprintInscreen::setCallback(const sp<IFingerprintInscreenCallback>& callback) {
-    LOG(ERROR) << __func__;
-
     {
         std::lock_guard<std::mutex> _lock(mCallbackLock);
         mCallback = callback;
     }
 
     return Void();
+}
+
+Return<int32_t> FingerprintInscreen::getPositionX() {
+    return FOD_POS_X;
+}
+
+Return<int32_t> FingerprintInscreen::getPositionY() {
+    return FOD_POS_Y;
+}
+
+Return<int32_t> FingerprintInscreen::getSize() {
+    return FOD_SIZE;
 }
 
 }  // namespace implementation
