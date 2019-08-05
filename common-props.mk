@@ -45,7 +45,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     vendor.display.enable_rotator_ui=1 \
     ro.sensor.not_support_rbg=1 \
-    ro.vendor.sensor.not_support_rbg=1
+    ro.vendor.sensor.not_support_rbg=1 \
+    vendor.display.enable_optimize_refresh=1
 
 # Google Keyboard padding
 PRODUCT_PROPERTY_OVERRIDES += \
