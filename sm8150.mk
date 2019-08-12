@@ -78,6 +78,10 @@ PRODUCT_PACKAGES += \
     libdisplayconfig \
     libqdMetaData.system
 
+# Dolby Audio
+PRODUCT_PACKAGES += \
+    DolbyAudio
+
 # Fingerprint
 PRODUCT_PACKAGES += \
     vendor.pa.biometrics.fingerprint.inscreen@1.0-service.oneplus_msmnile
