@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="co.aospa.dolby"
+          android:sharedUserId="android.uid.system" >
+
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+            android:allowBackup="true"
+            android:label="@string/device_settings_app_name"
+            android:persistent="true">
+
+        <activity
+                android:name=".DolbyAudioSettings"
+                android:label="@string/dolby_atmos_title"
+                android:theme="@style/ParanoidAndroid">
+            <intent-filter>
+                <action android:name="android.settings.ACTION_OTHER_SOUND_SETTINGS" />
+            </intent-filter>
+            <meta-data
+                    android:name="com.android.settings.category"
+                    android:value="com.android.settings.category.ia.sound" />
+        </activity>
+
+    </application>
+
+</manifest>
