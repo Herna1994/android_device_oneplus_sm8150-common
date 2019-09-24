@@ -1,2 +1,0 @@
-on boot
-    setprop sys.usb.config adb
