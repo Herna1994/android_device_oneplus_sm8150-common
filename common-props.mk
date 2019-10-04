@@ -115,7 +115,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Sensors
 PRODUCT_PROPERTY_OVERRIDES += \
-    persist.vendor.naruto.light.support=false
+    persist.vendor.naruto.light.support=true
 
 # Time
 PRODUCT_PROPERTY_OVERRIDES += \

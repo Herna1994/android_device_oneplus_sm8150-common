@@ -18,6 +18,9 @@
 # HALs
 #/system/bin/hw/vendor\.pa\.biometrics\.fingerprint\.inscreen@1.0-service\.oneplus_msmnile    u:object_r:hal_fod_msmnile_exec:s0
 
+# Sensors
+/(product|system/product)/vendor_overlay/[0-9]+/bin/hw/android\.hardware\.sensors@1\.0-service    u:object_r:hal_sensors_default_exec:s0
+
 # tri-state-key
 /system/bin/tri-state-key_daemon          u:object_r:tri-state-key_daemon_exec:s0
 

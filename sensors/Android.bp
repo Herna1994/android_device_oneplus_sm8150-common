@@ -1,0 +1,50 @@
+oneplus_msmnile_sensors_hal_library_static {
+    name: "multihal-oneplus-msmnile",
+    srcs: [
+        "multihal.cpp",
+        "SensorEventQueue.cpp",
+        "screenshot.cpp",
+    ],
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libutils",
+        "libdl",
+        "libhardware",
+        "libgui",
+        "libui",
+    ],
+    export_include_dirs: ["."],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-DNO_INPUT",
+    ],
+}
+
+cc_library_shared {
+    name: "android.hardware.sensors@1.0-impl.oneplus_msmnile",
+    defaults: ["hidl_defaults"],
+    relative_install_path: "hw",
+    srcs: ["Sensors.cpp"],
+    shared_libs: [
+        "liblog",
+        "libcutils",
+        "libhardware",
+        "libbase",
+        "libutils",
+        "libhidlbase",
+        "libhidltransport",
+        "android.hardware.sensors@1.0",
+        "libgui",
+        "libui",
+    ],
+    static_libs: [
+        "android.hardware.sensors@1.0-convert",
+        "multihal-oneplus-msmnile",
+    ],
+    cflags: [
+        "-DNO_INPUT",
+    ],
+    local_include_dirs: ["include/sensors"],
+}

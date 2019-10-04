@@ -131,6 +131,12 @@ PRODUCT_COPY_FILES += \
 -include vendor/qcom/common/bt/qti-bt.mk
 -include vendor/qcom/common/perf/qti-perf.mk
 
+# Sensors
+PRODUCT_PACKAGES += \
+	android.hardware.sensors@1.0-impl.oneplus_msmnile \
+	android.hardware.sensors@1.0-service.oneplus_msmnile \
+	libsensorndkbridge
+
 # tri-state-key
 PRODUCT_PACKAGES += \
     TriStateHandler \
